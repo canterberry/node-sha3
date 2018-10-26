@@ -15,25 +15,23 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include "KeccakNISTInterface.h"
 #include "KeccakF-1600-interface.h"
 
-namespace Node_SHA3 {
-
-HashReturn Init(hashState *state, int hashbitlen)
+SHA3_HashReturn SHA3_init(hashState *state, int hashbitlen)
 {
     switch(hashbitlen) {
         case 0: // Default parameters, arbitrary length output
-            InitSponge((spongeState*)state, 1024, 576);
+            InitSponge((Node_SHA3::spongeState*)state, 1024, 576);
             break;
         case 224:
-            InitSponge((spongeState*)state, 1152, 448);
+            InitSponge((Node_SHA3::spongeState*)state, 1152, 448);
             break;
         case 256:
-            InitSponge((spongeState*)state, 1088, 512);
+            InitSponge((Node_SHA3::spongeState*)state, 1088, 512);
             break;
         case 384:
-            InitSponge((spongeState*)state, 832, 768);
+            InitSponge((Node_SHA3::spongeState*)state, 832, 768);
             break;
         case 512:
-            InitSponge((spongeState*)state, 576, 1024);
+            InitSponge((Node_SHA3::spongeState*)state, 576, 1024);
             break;
         default:
             return BAD_HASHLEN;
@@ -42,43 +40,41 @@ HashReturn Init(hashState *state, int hashbitlen)
     return SUCCESS;
 }
 
-HashReturn Update(hashState *state, const BitSequence *data, DataLength databitlen)
+SHA3_HashReturn SHA3_update(hashState *state, const SHA3_BitSequence *data, SHA3_DataLength databitlen)
 {
     if ((databitlen % 8) == 0)
-        return (HashReturn) Absorb((spongeState*)state, data, databitlen);
+        return (SHA3_HashReturn) Absorb((Node_SHA3::spongeState*)state, data, databitlen);
     else {
-        HashReturn ret = (HashReturn) Absorb((spongeState*)state, data, databitlen - (databitlen % 8));
+        SHA3_HashReturn ret = (SHA3_HashReturn) Absorb((Node_SHA3::spongeState*)state, data, databitlen - (databitlen % 8));
         if (ret == SUCCESS) {
-            unsigned char lastByte; 
+            unsigned char lastByte;
             // Align the last partial byte to the least significant bits
             lastByte = data[databitlen/8] >> (8 - (databitlen % 8));
-            return (HashReturn) Absorb((spongeState*)state, &lastByte, databitlen % 8);
+            return (SHA3_HashReturn) Absorb((Node_SHA3::spongeState*)state, &lastByte, databitlen % 8);
         }
         else
             return ret;
     }
 }
 
-HashReturn Final(hashState *state, BitSequence *hashval)
+SHA3_HashReturn SHA3_final(hashState *state, SHA3_BitSequence *hashval)
 {
-    return (HashReturn) Squeeze(state, hashval, state->fixedOutputLength);
+    return (SHA3_HashReturn) Squeeze(state, hashval, state->fixedOutputLength);
 }
 
-HashReturn Hash(int hashbitlen, const BitSequence *data, DataLength databitlen, BitSequence *hashval)
+SHA3_HashReturn SHA3_hash(int hashbitlen, const SHA3_BitSequence *data, SHA3_DataLength databitlen, SHA3_BitSequence *hashval)
 {
     hashState state;
-    HashReturn result;
+    SHA3_HashReturn result;
 
     if ((hashbitlen != 224) && (hashbitlen != 256) && (hashbitlen != 384) && (hashbitlen != 512))
         return BAD_HASHLEN; // Only the four fixed output lengths available through this API
-    result = Init(&state, hashbitlen);
+    result = SHA3_init(&state, hashbitlen);
     if (result != SUCCESS)
         return result;
-    result = Update(&state, data, databitlen);
+    result = SHA3_update(&state, data, databitlen);
     if (result != SUCCESS)
         return result;
-    result = Final(&state, hashval);
+    result = SHA3_final(&state, hashval);
     return result;
 }
-
-} // namespace

@@ -16,36 +16,34 @@ http://creativecommons.org/publicdomain/zero/1.0/
 
 #include "KeccakSponge.h"
 
-namespace Node_SHA3 {
+typedef unsigned char SHA3_BitSequence;
+typedef unsigned long long SHA3_DataLength;
+typedef enum { SUCCESS = 0, FAIL = 1, BAD_HASHLEN = 2 } SHA3_HashReturn;
 
-typedef unsigned char BitSequence;
-typedef unsigned long long DataLength;
-typedef enum { SUCCESS = 0, FAIL = 1, BAD_HASHLEN = 2 } HashReturn;
-
-typedef spongeState hashState;
+typedef Node_SHA3::spongeState hashState;
 
 /**
   * Function to initialize the state of the Keccak[r, c] sponge function.
   * The rate r and capacity c values are determined from @a hashbitlen.
   * @param  state       Pointer to the state of the sponge function to be initialized.
-  * @param  hashbitlen  The desired number of output bits, 
+  * @param  hashbitlen  The desired number of output bits,
   *                     or 0 for Keccak[] with default parameters
   *                     and arbitrarily-long output.
   * @pre    The value of hashbitlen must be one of 0, 224, 256, 384 and 512.
   * @return SUCCESS if successful, BAD_HASHLEN if the value of hashbitlen is incorrect.
   */
-HashReturn Init(hashState *state, int hashbitlen);
+SHA3_HashReturn SHA3_init(hashState *state, int hashbitlen);
 /**
   * Function to give input data for the sponge function to absorb.
   * @param  state       Pointer to the state of the sponge function initialized by Init().
-  * @param  data        Pointer to the input data. 
+  * @param  data        Pointer to the input data.
   *                     When @a databitLen is not a multiple of 8, the last bits of data must be
   *                     in the most significant bits of the last byte.
   * @param  databitLen  The number of input bits provided in the input data.
   * @pre    In the previous call to Absorb(), databitLen was a multiple of 8.
   * @return SUCCESS if successful, FAIL otherwise.
   */
-HashReturn Update(hashState *state, const BitSequence *data, DataLength databitlen);
+SHA3_HashReturn SHA3_update(hashState *state, const SHA3_BitSequence *data, SHA3_DataLength databitlen);
 /**
   * Function to squeeze output data from the sponge function.
   * If @a hashbitlen was not 0 in the call to Init(), the number of output bits is equal to @a hashbitlen.
@@ -54,12 +52,12 @@ HashReturn Update(hashState *state, const BitSequence *data, DataLength databitl
   * @param  hashval     Pointer to the buffer where to store the output data.
   * @return SUCCESS if successful, FAIL otherwise.
   */
-HashReturn Final(hashState *state, BitSequence *hashval);
+SHA3_HashReturn SHA3_final(hashState *state, SHA3_BitSequence *hashval);
 /**
   * Function to compute a hash using the Keccak[r, c] sponge function.
   * The rate r and capacity c values are determined from @a hashbitlen.
   * @param  hashbitlen  The desired number of output bits.
-  * @param  data        Pointer to the input data. 
+  * @param  data        Pointer to the input data.
   *                     When @a databitLen is not a multiple of 8, the last bits of data must be
   *                     in the most significant bits of the last byte.
   * @param  databitLen  The number of input bits provided in the input data.
@@ -67,8 +65,6 @@ HashReturn Final(hashState *state, BitSequence *hashval);
   * @pre    The value of hashbitlen must be one of 224, 256, 384 and 512.
   * @return SUCCESS if successful, BAD_HASHLEN if the value of hashbitlen is incorrect.
   */
-HashReturn Hash(int hashbitlen, const BitSequence *data, DataLength databitlen, BitSequence *hashval);
-
-} // namespace
+SHA3_HashReturn SHA3_hash(int hashbitlen, const SHA3_BitSequence *data, SHA3_DataLength databitlen, SHA3_BitSequence *hashval);
 
 #endif

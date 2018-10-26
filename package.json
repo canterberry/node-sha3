@@ -13,24 +13,8 @@
     "type": "git",
     "url": "git://github.com/phusion/node-sha3.git"
   },
-  "main": "build/Release/sha3",
-  "scripts": {
-    "install": "node-gyp rebuild",
-    "test": "python test/generate_tests.py > test/test_vectors.js && node test/test_vectors.js && mocha test/unit_tests.js"
-  },
-  "gypfile": true,
-  "directories": {
-    "test": "test"
-  },
-  "author": {
-    "name": "Hongli Lai (Phusion)",
-    "email": "hongli@phusion.nl"
-  },
   "license": "MIT",
-  "dependencies": {
-    "nan": "2.10.0"
-  },
-  "devDependencies": {
-    "mocha": "5.1.1"
+  "scripts": {
+    "build": "emcc -Wall -O2 -o module.js -s MODULARIZE=1 -s EXPORTED_FUNCTIONS=\"['_pony']\" src/hello.c"
   }
 }
